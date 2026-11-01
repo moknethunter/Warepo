@@ -1,4 +1,4 @@
-name: Build and Push Multi-Arch Image
+name: Build and Push to Docker Hub
 
 on:
   push:
@@ -11,6 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # خطوة تشخيصية للتأكد من وجود المتغيرات
+      - name: Check Credentials
+        run: |
+          if [ -z "${{ vars.DOCKER_USERNAME }}" ]; then echo "::error::DOCKER_USERNAME is missing!"; exit 1; fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then echo "::error::DOCKERHUB_TOKEN is missing!"; exit 1; fi
+          echo "Credentials are set correctly ✅"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -29,5 +36,5 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64  # <--- هذا السطر مهم جداً لـ SnapDeploy
+          platforms: linux/amd64,linux/arm64
           tags: ${{ vars.DOCKER_USERNAME }}/whatsapp-gateway:latest
